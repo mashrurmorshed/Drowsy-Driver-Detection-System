@@ -1,5 +1,5 @@
 # Drowsy-Driver-Detection-System
-System to detect driver drowsiness using HOG facial landmarks.
+A system developed for our Software Development project.
 
 <h1>#Team Members:</h1>
  -Mashrur Mahmud Morshed<b><a href="https://github.com/ID56">(@ID56)</a></b><br>
