@@ -1,9 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<title>Drowsy Driver Detection System</title>
-</head>
-<body>
+
 	<h1>Drowsy Driver Detection System</h1>
 	<p>A system to detect drowsiness using extracted HOG facial landmarks. Developed as a part of CSE 4510: Software Development.</p>
 
@@ -27,5 +22,3 @@
 		<li>Shows runtime information on display</li>
 		<li>Generates an excel file(.csv format) containing metadata</li>
 	</ul>
-</body>
-</html>
