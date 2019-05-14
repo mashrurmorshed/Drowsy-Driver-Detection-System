@@ -1,5 +1,5 @@
 # USAGE
-# python detect_drowsiness.py -p shape_predictor_68_face_landmarks.dat -a alarm.wav
+# python drowsy.py 
 
 # import the necessary packages
 from scipy.spatial import distance as dist
@@ -8,7 +8,6 @@ from imutils import face_utils
 from threading import Thread
 import numpy as np
 import playsound
-import argparse
 import imutils
 import time
 import dlib
@@ -35,21 +34,16 @@ def eye_aspect_ratio(eye):
 	return ear
 
 def eyeinfo(eye,f):
-	info= "from: ("+str(eye[0][0])+","+str(eye[0][1])+") to ("+str(eye[3][0])+","+str(eye[1][1])+")"
+	info= "\""+str(eye[0][0])+", "+str(eye[0][1])+"\",\""+str(eye[3][0])+", "+str(eye[1][1])+"\""
 	if f==1:
-		return "Left Eye "+info
+		return "Left Eye,"+info
 	else:
-		return "Right Eye"+info+"\n"
+		return "Right Eye,"+info
 
-# construct the argument parse and parse the arguments
-ap = argparse.ArgumentParser()
-ap.add_argument("-p", "--shape-predictor", required=True,
-	help="path to facial landmark predictor")
-ap.add_argument("-a", "--alarm", type=str, default="",
-	help="path alarm .WAV file")
-ap.add_argument("-w", "--webcam", type=int, default=0,
-	help="index of webcam on system")
-args = vars(ap.parse_args())
+
+alarmfile="alarm.wav"
+shape_pred="shape_predictor_68_face_landmarks.dat"
+wcam=0 #d
  
 # define two constants, one for the eye aspect ratio to indicate
 # blink and then a second constant for the number of consecutive
@@ -71,7 +65,7 @@ ALARM_ON = False
 # the facial landmark predictor
 print("[INFO] loading facial landmark predictor...")
 detector = dlib.get_frontal_face_detector()
-predictor = dlib.shape_predictor(args["shape_predictor"])
+predictor = dlib.shape_predictor(shape_pred)
 
 # grab the indexes of the facial landmarks for the left and
 # right eye, respectively
@@ -80,16 +74,16 @@ predictor = dlib.shape_predictor(args["shape_predictor"])
 
 # start the video stream thread
 print("[INFO] starting video stream thread...")
-vs = VideoStream(src=args["webcam"]).start()
+vs = VideoStream(src=wcam).start()
 time.sleep(1.0)
 
 
-file1 = open("logfile.txt","a")
-file1.write("Starting system. . .\n")
+file1 = open("log.csv","a")
+file1.write("Time, Event, From, To, Blinkcount,Frame rate\n")
 
 start= time.time()
 start_time = time.asctime(time.localtime(time.time()))
-file1.write("Started logging at: "+str(start_time)+"\n")
+file1.write(str(start_time)+", Start\n")
 
 framecount=0
 wcount=0
@@ -128,10 +122,12 @@ while True:
 		rightEAR = eye_aspect_ratio(rightEye)
 
 		if framecount%90==0:
+			
+			tm = str(time.asctime(time.localtime(time.time())))
 			Linfo=eyeinfo(leftEye,1)
 			Rinfo=eyeinfo(rightEye,2)
-			file1.write(" >"+Linfo+" && ")
-			file1.write(Rinfo)
+			file1.write(tm+","+Linfo+"\n")
+			file1.write(tm+","+Rinfo+"\n")
 
 		# average the eye aspect ratio together for both eyes
 		ear = (leftEAR + rightEAR) / 2.0
@@ -160,18 +156,18 @@ while True:
 					# check to see if an alarm file was supplied,
 					# and if so, start a thread to have the alarm
 					# sound played in the background
-					if args["alarm"] != "":
-						t = Thread(target=sound_alarm,
-							args=(args["alarm"],))
-						t.deamon = True
-						t.start()
+					
+					t = Thread(target=sound_alarm,
+						args=(alarmfile,))
+					t.deamon = True
+					t.start()
 
 				
 				cv2.putText(frame, "WARNING!!!", (10, 30),
 					cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 0, 255), 4)
 				if f==0:
 					wtime = time.asctime(time.localtime(time.time()))
-					file1.write("**Drowsiness detected at "+str(wtime)+"\n")
+					file1.write(str(wtime)+",Drowsiness\n")
 					f=1
 				wcount +=1
 				if (wcount>50):
@@ -200,7 +196,7 @@ while True:
 	if framecount%300==0:
 		avbl=int((BLINKS-LASTBL))
 		LASTBL=BLINKS
-		file1.write("Blinks per 10s: "+str(avbl)+"\n")
+		file1.write(" ,Blinks/10s, , ,"+str(avbl)+"\n")
 
 
 
@@ -225,10 +221,9 @@ fps=round(framecount/totalruntime)
 
 
 end_time = time.asctime(time.localtime(time.time()))
-file1.write("Ended at: "+str(end_time)+"\n")
-file1.write("Total Runtime: "+str(totalruntime)+"\n")
-file1.write("Average frames per sec: "+str(fps)+"\n")
-file1.write("-------------\n\n")
+file1.write(str(end_time)+",End\n")
+file1.write(" ,frame/sec, , , ,"+str(fps)+"fps\n")
+file1.write("-,-,-,-,-,-\n\n")
 file1.close()
 
 
