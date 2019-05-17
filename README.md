@@ -10,7 +10,7 @@ Mashrur Mahmud Morshed<b><a href="https://github.com/ID56">(@ID56)</a></b>
 Hasan Tanvir Iqbal<b><a href="https://github.com/TanvirHundredOne">(@TanvirHundredOne)</a></b>
 </li>
 <li>
-Mazharul Islam Rishad
+Mazharul Islam Rishad<b><a href="https://github.com/Aporamithos">(@Aporamithos)</a></b>
 </li>
 </ul>
 
